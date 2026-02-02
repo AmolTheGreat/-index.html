@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sixth Grade Math Mastery Quiz</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #fdf6e3;
+    color: #073642;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .screen {
+    background-color: #eee8d5;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  }
+  h1 {
+    color: #dc322f;
+  }
+  button {
+    background-color: #268bd2;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #2aa198;
+  }
+  input[type="text"] {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #073642;
+    margin: 10px 0;
+  }
+  .question {
+    margin: 20px 0;
+    text-align: left;
+  }
+  .score {
+    font-size: 24px;
+    font-weight: bold;
+    color: #859900;
+  }
+  .credit {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #586e75;
+  }
+  .review {
+    text-align: left;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fdf6e3;
+    border-radius: 10px;
+    border: 1px solid #073642;
+  }
+</style>
+</head>
+<body>
+
+<div class="screen" id="start-screen">
+  <h1>Sixth Grade Math Mastery</h1>
+  <p>Write your name below and press Begin:</p>
+  <input type="text" id="name-input" placeholder="Your Name">
+  <br>
+  <button onclick="startQuiz()">Begin</button>
+</div>
+
+<div class="screen" id="quiz-screen" style="display:none;">
+  <h1 id="question-title">Question</h1>
+  <div class="question" id="question-text"></div>
+  <div id="options"></div>
+  <input type="text" id="answer-input" placeholder="Type your answer here" style="display:none;">
+  <br>
+  <button onclick="nextQuestion()" id="next-btn">Next</button>
+</div>
+
+<div class="screen" id="result-screen" style="display:none;">
+  <h1>Quiz Complete!</h1>
+  <p class="score" id="final-score"></p>
+  <div id="review-section"></div>
+  <div class="credit">Credit: Exam Sixth Math Mastery</div>
+</div>
+
+<script>
+let questions = [
+  {text: 'Which is an additive relationship?', type: 'mc', options: ['y = 2x', 'y = x + 5', 'y = 3x', 'y = x * 4'], answer: 'y = x + 5'},
+  {text: 'Fill in: y depends on ___', type: 'input', answer: 'x'},
+  {text: 'From the table: x:1,2,3 y:3,6,9. Is this additive or multiplicative?', type: 'mc', options: ['Additive', 'Multiplicative'], answer: 'Multiplicative'},
+  {text: 'Write the equation for this table: x:1,2,3 y:2,4,6', type: 'input', answer: 'y = 2x'},
+  {text: 'Verbal: You start with $10 and save $2 each day. Write the equation.', type: 'input', answer: 'y = x + 10'},
+  {text: 'Represent: A car drives 50 miles per hour. Which equation is correct?', type: 'mc', options: ['y = 50x', 'y = x + 50', 'y = x * 2', 'y = x + 2'], answer: 'y = 50x'},
+  {text: 'Identify independent and dependent: Hours studied vs Test Score.', type: 'mc', options: ['Independent: Test Score, Dependent: Hours', 'Independent: Hours, Dependent: Test Score'], answer: 'Independent: Hours, Dependent: Test Score'},
+  {text: 'Complete the equation for multiplicative: x:1,2,3 y:5,10,15', type: 'input', answer: 'y = 5x'}
+];
+
+let current = 0;
+let score = 0;
+let userName = '';
+let review = [];
+
+function startQuiz() {
+  userName = document.getElementById('name-input').value;
+  if(userName === '') { alert('Please enter your name!'); return; }
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  let q = questions[current];
+  document.getElementById('question-title').innerText = 'Question ' + (current + 1);
+  document.getElementById('question-text').innerText = q.text;
+  let optionsDiv = document.getElementById('options');
+  let answerInput = document.getElementById('answer-input');
+
+  optionsDiv.innerHTML = '';
+  answerInput.style.display = 'none';
+  answerInput.value = '';
+
+  if(q.type === 'mc') {
+    q.options.forEach(opt => {
+      let btn = document.createElement('button');
+      btn.innerText = opt;
+      btn.onclick = () => { checkAnswer(opt); };
+      optionsDiv.appendChild(btn);
+    });
+  } else {
+    answerInput.style.display = 'block';
+    answerInput.placeholder = 'Ask AI for written response';
+  }
+}
+
+function checkAnswer(ans) {
+  let q = questions[current];
+  let isCorrect = (ans === q.answer);
+  if(isCorrect) score++;
+  review.push({question: q.text, yourAnswer: ans, correctAnswer: q.answer, correct: isCorrect});
+}
+
+function nextQuestion() {
+  let q = questions[current];
+  if(q.type === 'input') {
+    let userAns = document.getElementById('answer-input').value.trim();
+    checkAnswer(userAns);
+  }
+  current++;
+  if(current >= questions.length) {
+    showResult();
+  } else {
+    showQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+  document.getElementById('final-score').innerText = userName + ', your score: ' + score + '/' + questions.length;
+
+  let reviewHTML = '<h2>Review:</h2>';
+  review.forEach((r, i) => {
+    reviewHTML += '<div class="review"><strong>Q'+(i+1)+':</strong> '+r.question+'<br>';
+    reviewHTML += '<strong>Your answer:</strong> '+r.yourAnswer+'<br>';
+    if(!r.correct) { reviewHTML += '<strong>Correct answer:</strong> '+r.correctAnswer; }
+    reviewHTML += '</div>';
+  });
+  document.getElementById('review-section').innerHTML = reviewHTML;
+}
+</script>
+
+</body>
+</html>
